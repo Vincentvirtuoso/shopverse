@@ -28,7 +28,7 @@ const RecommendedProducts = () => {
   return (
     <section>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold">Recommended Products</h2>
+        <h2 className="text-2xl font-semibold">Products</h2>
         <a className="text-sm text-red-500 hover:underline" href="#">
           See all
         </a>
