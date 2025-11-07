@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
+import useCart from "../../hooks/useCart";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
 import {
@@ -9,19 +10,39 @@ import {
   LuTag,
   LuStar,
   LuShare2,
+  LuStarHalf,
+  LuSparkles,
+  LuAward,
 } from "react-icons/lu";
+import CartQuantityUpdater from "./CartQuantityUpdater";
+import HighlightText from "./HighlightText";
+import { useNavigate } from "react-router-dom";
 
 // Memoized Star component
-const Star = React.memo(({ filled }) => (
-  <LuStar
-    className={`w-4 h-4 ${
-      filled ? "text-yellow-400 fill-current" : "text-gray-300"
-    }`}
-    aria-hidden="true"
-  />
-));
+const Star = ({ rating }) => {
+  const stars = [];
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 >= 0.5;
 
-Star.displayName = "Star";
+  for (let i = 0; i < fullStars; i++) {
+    stars.push(
+      <LuStar key={i} className="w-4 h-4 text-yellow-400 fill-current" />
+    );
+  }
+
+  if (hasHalfStar) {
+    stars.push(
+      <LuStarHalf key="half" className="w-4 h-4 text-yellow-400 fill-current" />
+    );
+  }
+
+  const remainingStars = 5 - stars.length;
+  for (let i = 0; i < remainingStars; i++) {
+    stars.push(<LuStar key={`empty-${i}`} className="w-4 h-4 text-gray-300" />);
+  }
+
+  return <div className="flex items-center gap-0.5">{stars}</div>;
+};
 
 const ProductCard = ({
   product,
@@ -38,8 +59,10 @@ const ProductCard = ({
   slideshowInterval = 4000,
   enableHoverEffects = true,
   compact = false,
+  query,
 }) => {
   const {
+    id,
     name,
     brand,
     price,
@@ -75,6 +98,8 @@ const ProductCard = ({
     setImageError(false);
   }, [currentImageIndex]);
 
+  const navigate = useNavigate();
+
   // Auto-cycle through images only on hover
   useEffect(() => {
     if (displayImages.length <= 1) return;
@@ -86,7 +111,6 @@ const ProductCard = ({
     return () => clearInterval(interval);
   }, [displayImages.length, slideshowInterval]);
 
-  const roundedRating = Math.round(rating);
   const hasDiscount = originalPrice && originalPrice > price;
   const discountPercentage = useMemo(
     () =>
@@ -94,16 +118,6 @@ const ProductCard = ({
         ? Math.round(((originalPrice - price) / originalPrice) * 100)
         : discount,
     [hasDiscount, originalPrice, price, discount]
-  );
-
-  // Memoized event handlers
-  const handleAddToCart = useCallback(
-    (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      onAddToCart?.(product);
-    },
-    [onAddToCart, product]
   );
 
   const handleQuickView = useCallback(
@@ -134,10 +148,8 @@ const ProductCard = ({
   );
 
   const handleCardClick = useCallback(() => {
-    if (url) {
-      window.open(url, "_blank");
-    }
-  }, [url]);
+    navigate(`/product/${id}`);
+  }, [id, navigate]);
 
   const handleKeyPress = useCallback(
     (e) => {
@@ -233,7 +245,7 @@ const ProductCard = ({
               animate={{ scale: 1 }}
               transition={{ delay: 0.2 }}
             >
-              NEW
+              <LuSparkles className="inline-flex mr-0.5" /> NEW
             </motion.span>
           )}
           {isBestSeller && (
@@ -243,7 +255,7 @@ const ProductCard = ({
               animate={{ scale: 1 }}
               transition={{ delay: 0.3 }}
             >
-              BEST SELLER
+              <LuAward className="inline-flex mr-0.5" /> BEST SELLER
             </motion.span>
           )}
           {showDiscount && discountPercentage > 0 && (
@@ -360,6 +372,8 @@ const ProductCard = ({
           {name}
         </h3>
 
+        {query ? <HighlightText text={name} query={query} /> : name}
+
         {/* Brand */}
         {brand && !compact && (
           <p className="text-sm text-gray-600 mb-2">
@@ -371,9 +385,7 @@ const ProductCard = ({
         {showRating && rating > 0 && (
           <div className="flex items-center gap-2 mb-3">
             <div className="flex items-center gap-0.5">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star key={i} filled={i < roundedRating} />
-              ))}
+              <Star rating={rating} />
             </div>
             <span className="text-sm font-medium text-gray-700">
               {rating.toFixed(1)}
@@ -416,7 +428,7 @@ const ProductCard = ({
           )}
 
         {/* Tags */}
-        {tags.length > 0 && !compact && (
+        {tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-3 items-center">
             {tags.slice(0, 3).map((tag) => (
               <span
@@ -424,7 +436,7 @@ const ProductCard = ({
                 className="text-xs bg-gray-50 text-gray-600 border border-gray-300 px-2.5 py-1 rounded-full font-medium inline-flex items-center gap-1"
               >
                 <LuTag className="w-3 h-3" />
-                {tag}
+                {query ? <HighlightText text={tag} query={query} /> : tag}
               </span>
             ))}
             {tags.length > 3 && (
@@ -436,33 +448,11 @@ const ProductCard = ({
         )}
 
         {/* Add to Cart Button */}
-        <motion.button
-          onClick={handleAddToCart}
-          disabled={!inStock}
-          className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-semibold transition-all duration-200 mt-auto ${
-            inStock
-              ? "bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 shadow-md hover:shadow-lg active:scale-95"
-              : "bg-gray-200 text-gray-400 cursor-not-allowed"
-          } ${compact ? "py-2 text-sm" : ""}`}
-          whileHover={inStock ? { scale: 1.02 } : {}}
-          whileTap={inStock ? { scale: 0.98 } : {}}
-          aria-label={inStock ? `Add ${name} to shopping cart` : "Out of Stock"}
-          aria-disabled={!inStock}
-        >
-          <LuShoppingCart className="w-5 h-5" />
-          {inStock ? (
-            <>
-              Add to Cart
-              {!compact && (
-                <span className="ml-auto text-sm font-normal opacity-90">
-                  ₦{price.toLocaleString()}
-                </span>
-              )}
-            </>
-          ) : (
-            "Notify Me"
-          )}
-        </motion.button>
+        <CartQuantityUpdater
+          textSize="text-sm"
+          product={product}
+          compact={compact}
+        />
       </div>
     </motion.article>
   );

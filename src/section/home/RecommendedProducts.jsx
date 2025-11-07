@@ -1,6 +1,6 @@
 import React from "react";
 import ProductCard from "../../components/common/ProductCard";
-import { products } from "../../data/products";
+import products from "../../data/products";
 
 const RecommendedProducts = () => {
   const [favorites, setFavorites] = React.useState(new Set());

@@ -1,6 +1,8 @@
 import { Outlet } from "react-router-dom";
 import Navbar from "./components/layouts/Navbar";
 import Footer from "./components/layouts/Footer";
+import { Toaster } from "react-hot-toast";
+import ScrollToTop from "./components/common/ScrollToTop";
 
 function App() {
   return (
@@ -10,6 +12,14 @@ function App() {
         <Outlet />
       </div>
       <Footer />
+      <ScrollToTop />
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: { background: "#333", color: "#fff" },
+          success: { iconTheme: { primary: "#fb2c36", secondary: "#fff" } },
+        }}
+      />
     </div>
   );
 }

@@ -1,11 +1,7 @@
 import { motion } from "framer-motion";
-import {
-  LuFacebook,
-  LuTwitter,
-  LuInstagram,
-  LuPhone,
-  LuMailCheck,
-} from "react-icons/lu";
+import { LuPhone, LuMailCheck } from "react-icons/lu";
+import { FaFacebookF } from "react-icons/fa";
+import { SiInstagram, SiX } from "react-icons/si";
 
 const Footer = () => {
   const footerLinks = {
@@ -29,9 +25,9 @@ const Footer = () => {
             </p>
             <div className="flex gap-4">
               {[
-                { icon: <LuFacebook />, label: "Facebook" },
-                { icon: <LuTwitter />, label: "Twitter" },
-                { icon: <LuInstagram />, label: "Instagram" },
+                { icon: <FaFacebookF />, label: "Facebook" },
+                { icon: <SiX />, label: "Twitter" },
+                { icon: <SiInstagram />, label: "Instagram" },
               ].map((social, index) => (
                 <motion.button
                   key={index}
