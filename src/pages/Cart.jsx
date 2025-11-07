@@ -141,73 +141,86 @@ const Cart = () => {
                     key={item.id}
                     className="flex gap-4 p-4 rounded-xl border border-gray-200 hover:border-purple-300 hover:shadow-md transition-all"
                   >
-                    <ProductImage
-                      className="object-cover"
-                      src={item.image}
-                      alt={item.name}
-                      size="24"
-                    />
+                    <div className="relative w-20">
+                      <ProductImage
+                        className="object-cover"
+                        src={item.image}
+                        alt={item.name}
+                        size="20"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <div className=" min-w-0">
+                        <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">
+                          {item.name}
+                        </h3>
+                        <p className="text-lg font-bold text-red-600 mb-3">
+                          ₦{item.price.toLocaleString()}
+                        </p>
 
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-900 mb-1 truncate">
-                        {item.name}
-                      </h3>
-                      <p className="text-lg font-bold text-red-600 mb-3">
-                        ₦{item.price.toLocaleString()}
-                      </p>
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+                            <button
+                              onClick={() => decrementQuantity(item.id)}
+                              className="w-8 h-8 flex items-center justify-center hover:bg-white rounded-md transition-colors"
+                            >
+                              <LuMinus className="w-4 h-4" />
+                            </button>
+                            <span className="w-8 text-center font-medium">
+                              {item.quantity}
+                            </span>
+                            <button
+                              onClick={() => incrementQuantity(item.id)}
+                              className="w-8 h-8 flex items-center justify-center hover:bg-white rounded-md transition-colors"
+                              disabled={item.quantity >= item.maxUnits}
+                            >
+                              <LuPlus className="w-4 h-4" />
+                            </button>
+                          </div>
 
-                      <div className="flex items-center gap-3 flex-wrap">
-                        <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
                           <button
-                            onClick={() => decrementQuantity(item.id)}
-                            className="w-8 h-8 flex items-center justify-center hover:bg-white rounded-md transition-colors"
+                            onClick={() => moveToSaved(item)}
+                            className="text-sm text-gray-600 hover:text-purple-600 font-medium transition-colors flex items-center gap-1"
                           >
-                            <LuMinus className="w-4 h-4" />
+                            <LuHeart className="w-4 h-4" />
                           </button>
-                          <span className="w-8 text-center font-medium">
-                            {item.quantity}
-                          </span>
+
                           <button
-                            onClick={() => incrementQuantity(item.id)}
-                            className="w-8 h-8 flex items-center justify-center hover:bg-white rounded-md transition-colors"
-                            disabled={item.quantity >= item.maxUnits}
+                            onClick={() => removeFromCart(item.id)}
+                            className="text-sm text-gray-600 hover:text-red-600 font-medium transition-colors flex items-center gap-1"
                           >
-                            <LuPlus className="w-4 h-4" />
+                            <LuTrash className="w-4 h-4" />
                           </button>
                         </div>
 
-                        <button
-                          onClick={() => moveToSaved(item)}
-                          className="text-sm text-gray-600 hover:text-purple-600 font-medium transition-colors flex items-center gap-1"
-                        >
-                          <LuHeart className="w-4 h-4" />
-                          Save for later
-                        </button>
-
-                        <button
-                          onClick={() => removeFromCart(item.id)}
-                          className="text-sm text-gray-600 hover:text-red-600 font-medium transition-colors flex items-center gap-1"
-                        >
-                          <LuTrash className="w-4 h-4" />
-                          Remove
-                        </button>
+                        {item.quantity >= item.maxUnits && (
+                          <p className="text-xs text-orange-600 mt-2 flex items-center gap-1">
+                            <LuCircleAlert className="w-3 h-3" />
+                            Maximum quantity reached
+                          </p>
+                        )}
                       </div>
-
-                      {item.quantity >= item.maxUnits && (
-                        <p className="text-xs text-orange-600 mt-2 flex items-center gap-1">
-                          <LuCircleAlert className="w-3 h-3" />
-                          Maximum quantity reached
+                      <div className="text-right mt-2">
+                        <p className="font-bold text-gray-900">
+                          ₦{(item.price * item.quantity).toLocaleString()}
                         </p>
-                      )}
-                    </div>
-
-                    <div className="text-right">
-                      <p className="font-bold text-gray-900">
-                        ₦{(item.price * item.quantity).toLocaleString()}
-                      </p>
+                      </div>
                     </div>
                   </div>
                 ))}
+
+                {items.length === 0 && (
+                  <div className="text-center py-6">
+                    <LuShoppingBag className="w-12 h-12 mx-auto text-gray-300 mb-2" />
+                    <p className="text-gray-500">Your cart is empty</p>
+                    <button
+                      className="mt-4 bg-red-600 text-white rounded-md px-4 py-2 hover:bg-red-700 transition-colors"
+                      onClick={() => handleNavigate("/products")}
+                    >
+                      Continue Shopping
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 

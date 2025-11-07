@@ -75,6 +75,10 @@ const cartReducer = (state, action) => {
       const exists = state.savedForLater.find(
         (i) => i.id === action.payload.id
       );
+
+      console.log(exists);
+      console.log(state);
+
       return exists
         ? {
             ...state,

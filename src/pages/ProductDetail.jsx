@@ -292,7 +292,7 @@ const ProductDetail = () => {
 
             {/* Price Section */}
             <div className="space-y-2">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 <span className="text-4xl font-bold text-gray-900">
                   ₦{product.price.toLocaleString()}
                 </span>

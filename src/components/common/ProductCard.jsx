@@ -13,10 +13,12 @@ import {
   LuStarHalf,
   LuSparkles,
   LuAward,
+  LuInfo,
 } from "react-icons/lu";
 import CartQuantityUpdater from "./CartQuantityUpdater";
 import HighlightText from "./HighlightText";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 // Memoized Star component
 const Star = ({ rating }) => {
@@ -46,11 +48,8 @@ const Star = ({ rating }) => {
 
 const ProductCard = ({
   product,
-  onAddToCart,
   onQuickView,
-  onToggleFavorite,
   onShare,
-  isFavorite = false,
   showDiscount = true,
   showRating = true,
   showStock = true,
@@ -78,7 +77,6 @@ const ProductCard = ({
     discount,
     isNew = false,
     isBestSeller = false,
-    url,
   } = product;
 
   // Memoize derived values
@@ -91,6 +89,10 @@ const ProductCard = ({
   const [isHovered, setIsHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+
+  const { savedForLater, toggleFavorite } = useCart();
+
+  const isSavedForLater = savedForLater.some((item) => item.id === id);
 
   // Reset image loaded state when image changes
   useEffect(() => {
@@ -133,9 +135,13 @@ const ProductCard = ({
     (e) => {
       e.preventDefault();
       e.stopPropagation();
-      onToggleFavorite?.(product);
+      toggleFavorite(product);
+      toast(isSavedForLater ? "Removed from Favorites" : "Added to Favorites", {
+        iconTheme: isSavedForLater ? "info" : "success",
+        icon: <LuInfo />,
+      });
     },
-    [onToggleFavorite, product]
+    [toggleFavorite, product]
   );
 
   const handleShare = useCallback(
@@ -148,7 +154,7 @@ const ProductCard = ({
   );
 
   const handleCardClick = useCallback(() => {
-    navigate(`/product/${id}`);
+    // navigate(`/product/${id}`);
   }, [id, navigate]);
 
   const handleKeyPress = useCallback(
@@ -281,23 +287,23 @@ const ProductCard = ({
             isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2"
           }`}
         >
-          {onToggleFavorite && (
-            <motion.button
-              onClick={handleToggleFavorite}
-              className={`p-2.5 rounded-full bg-white/95 backdrop-blur-sm shadow-lg hover:bg-white transition-all duration-200 hover:scale-110 ${
-                isFavorite ? "text-red-500" : "text-gray-700 hover:text-red-500"
-              }`}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              aria-label={
-                isFavorite ? "Remove from favorites" : "Add to favorites"
-              }
-            >
-              <LuHeart
-                className={`w-5 h-5 ${isFavorite ? "fill-current" : ""}`}
-              />
-            </motion.button>
-          )}
+          <motion.button
+            onClick={handleToggleFavorite}
+            className={`p-2.5 rounded-full bg-white/95 backdrop-blur-sm shadow-lg hover:bg-white transition-all duration-200 hover:scale-110 ${
+              isSavedForLater
+                ? "text-red-500"
+                : "text-gray-700 hover:text-red-500"
+            }`}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            aria-label={
+              isSavedForLater ? "Remove from favorites" : "Add to favorites"
+            }
+          >
+            <LuHeart
+              className={`w-5 h-5 ${isSavedForLater ? "fill-current" : ""}`}
+            />
+          </motion.button>
 
           {onQuickView && (
             <motion.button
@@ -433,7 +439,7 @@ const ProductCard = ({
             {tags.slice(0, 3).map((tag) => (
               <span
                 key={tag}
-                className="text-xs bg-gray-50 text-gray-600 border border-gray-300 px-2.5 py-1 rounded-full font-medium inline-flex items-center gap-1"
+                className="text-xs bg-gray-50 text-gray-600 border border-gray-300 px-2.5 py-1 rounded-full font-medium inline-flex items-center gap-1 capitalize"
               >
                 <LuTag className="w-3 h-3" />
                 {query ? <HighlightText text={tag} query={query} /> : tag}
